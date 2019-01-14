@@ -1,11 +1,31 @@
 package main
 
-import "Prem/pkg/router"
+import (
+	"github.com/sirupsen/logrus"
 
-var (
-	PORT = ":8080"
+	"Prem/pkg/api"
+	"sync"
 )
 
+const httpPort int = 8080
+
 func main() {
-	router.RunRouter(PORT)
+	apiServer := api.NewServer(httpPort)
+	logrus.WithFields(logrus.Fields{
+		"port": httpPort,
+	}).Info("Starting HTTP server")
+
+	var wg sync.WaitGroup
+	wg.Add(1)
+
+	go func() {
+		err := apiServer.Run()
+		if err != nil {
+			logrus.Fatal(err)
+		}
+		wg.Done()
+	}()
+	defer apiServer.Close()
+
+	wg.Wait()
 }
