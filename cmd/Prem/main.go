@@ -1,12 +1,9 @@
 package main
 
 import (
-	"fmt"
-	"net/http"
 	"os"
 	"path/filepath"
 
-	"github.com/gorilla/handlers"
 	"github.com/sirupsen/logrus"
 
 	"Prem/pkg/api"
@@ -16,13 +13,21 @@ const httpPort int = 8080
 
 func main() {
 	initLogrus()
-	router := api.Routes()
 
-	corsHandler := handlers.CORS(handlers.AllowedHeaders([]string{"X-Requested-With", "Content-Type", "Authorization"}))
+	//router := api.Routes()
+	//corsHandler := handlers.CORS(handlers.AllowedHeaders([]string{"X-Requested-With", "Content-Type", "Authorization"}))
+	//logrus.WithFields(logrus.Fields{
+	//	"http-port": httpPort,
+	//}).Info("Starting server")
+	//logrus.Fatal(http.ListenAndServe(fmt.Sprintf(":%v", httpPort), corsHandler(&router)))
+
+	apiServer := api.NewServer(httpPort)
 	logrus.WithFields(logrus.Fields{
-		"http-port": httpPort,
-	}).Info("Starting server")
-	logrus.Fatal(http.ListenAndServe(fmt.Sprintf(":%v", httpPort), corsHandler(&router)))
+		"port": httpPort,
+	}).Info("Starting HTTP server")
+
+	defer apiServer.Close()
+	apiServer.Run()
 
 }
 
