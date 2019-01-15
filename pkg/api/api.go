@@ -3,37 +3,21 @@ package api
 import (
 	"net/http"
 
-	"strconv"
-	"time"
+	"github.com/gorilla/mux"
 )
 
-type Server struct {
-	server *http.Server
-}
+func Routes() mux.Router {
+	router := mux.NewRouter()
+	router.HandleFunc("/intro", intro)
 
-func NewServer(httpPort int) *Server {
-	mux := http.NewServeMux()
-	server := &http.Server{
-		Addr:         ":" + strconv.Itoa(httpPort),
-		Handler:      mux,
-		ReadTimeout:  15 * time.Second,
-		WriteTimeout: 15 * time.Second,
-	}
-	s := &Server{server: server}
-	mux.HandleFunc("/", intro)
-	return s
-}
-
-func (s *Server) Run() error {
-	err := s.server.ListenAndServe()
-	if err == http.ErrServerClosed {
-		err = nil
-	}
-	return err
-}
-
-func (s *Server) Close() {
-	s.server.Close()
+	router.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir("./ui/build/static/"))))
+	router.PathPrefix("/favicon.ico").HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, "./ui/build/favicon.ico")
+	})
+	router.PathPrefix("/").HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, "./ui/build/index.html")
+	})
+	return *router
 }
 
 func intro(w http.ResponseWriter, req *http.Request) {
