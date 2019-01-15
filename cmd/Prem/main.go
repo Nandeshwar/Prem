@@ -26,8 +26,8 @@ func main() {
 		"port": httpPort,
 	}).Info("Starting HTTP server")
 
-	defer apiServer.Close()
 	apiServer.Run()
+	defer apiServer.Close()
 
 }
 

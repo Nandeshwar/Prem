@@ -69,6 +69,7 @@ func (s *Server) Run() error {
 		}
 		s.wg.Done()
 	}()
+	s.wg.Wait()
 	return err
 }
 
@@ -83,6 +84,5 @@ func (s *Server) Close() {
 			logrus.Info("\nHttpServer : Service stopping : Error=%v\n", err)
 		}
 	}
-	s.wg.Wait()
 	logrus.Info("\nHttpServer : Stopped\n")
 }
