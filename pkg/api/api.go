@@ -1,6 +1,7 @@
 package api
 
 import (
+	"context"
 	"net/http"
 
 	"strconv"
@@ -9,6 +10,7 @@ import (
 	"sync"
 
 	"github.com/gorilla/mux"
+	"github.com/sirupsen/logrus"
 )
 
 func Routes() mux.Router {
@@ -67,10 +69,20 @@ func (s *Server) Run() error {
 		}
 		s.wg.Done()
 	}()
-	s.wg.Wait()
 	return err
 }
 
 func (s *Server) Close() {
-	s.server.Close()
+	const timeout = 5 * time.Second
+	ctx, cancel := context.WithTimeout(context.Background(), timeout)
+	defer cancel()
+
+	if err := s.server.Shutdown(ctx); err != nil {
+		// Looks like we timed out on the graceful shutdown. Force close.
+		if err := s.server.Close(); err != nil {
+			logrus.Info("\nHttpServer : Service stopping : Error=%v\n", err)
+		}
+	}
+	s.wg.Wait()
+	logrus.Info("\nHttpServer : Stopped\n")
 }
