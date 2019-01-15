@@ -13,14 +13,6 @@ const httpPort int = 8080
 
 func main() {
 	initLogrus()
-
-	//router := api.Routes()
-	//corsHandler := handlers.CORS(handlers.AllowedHeaders([]string{"X-Requested-With", "Content-Type", "Authorization"}))
-	//logrus.WithFields(logrus.Fields{
-	//	"http-port": httpPort,
-	//}).Info("Starting server")
-	//logrus.Fatal(http.ListenAndServe(fmt.Sprintf(":%v", httpPort), corsHandler(&router)))
-
 	apiServer := api.NewServer(httpPort)
 	logrus.WithFields(logrus.Fields{
 		"port": httpPort,
